@@ -60,7 +60,7 @@ export default {
 
     // Создаём embed
     const embed = createEmbed({ 
-      title: `📊 Информация о сервере: ${guild.name}`,
+      title: `\u{1F4CA} Информация о сервере: ${guild.name}`,
       description: `🆔 **ID:** ${guild.id}`,
       color: 0x2B2D31,
       thumbnail: guild.iconURL({ size: 256 })
