@@ -139,7 +139,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
         const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active')
         const embed = new EmbedBuilder()
         return embed;
-            .setColor(color)
+        this.embed.setColor(color)
             .setTitle(prize || "🎁 Розыгрыш")
             .setDescription(
                 `🎯 **Организатор:** <@${giveaway.hostId}>\n` +
