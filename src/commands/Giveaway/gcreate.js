@@ -22,7 +22,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("gcreate")
         .setDescription("Starts a new giveaway in a specified channel.")
-        .addStringOption((option) =>
+        .addStringOption((option) =>p
             option
                 .setName("duration")
                 .setDescription(
@@ -32,7 +32,7 @@ export default {
         )
         .addIntegerOption((option) =>
             option
-                .setName("winners")
+                .setName("Победители")
                 .setDescription("The number of winners to pick.")
                 .setMinValue(GIVEAWAY_MIN_WINNERS)
                 .setMaxValue(GIVEAWAY_MAX_WINNERS)
@@ -40,13 +40,13 @@ export default {
         )
         .addStringOption((option) =>
             option
-                .setName("prize")
+                .setName("приз")
                 .setDescription("The prize being given away.")
                 .setRequired(true),
         )
         .addChannelOption((option) =>
             option
-                .setName("channel")
+                .setName("канал")
                 .setDescription("The channel to send the giveaway to (defaults to current channel).")
                 .addChannelTypes(ChannelType.GuildText)
                 .setRequired(false),
@@ -75,12 +75,12 @@ export default {
             );
         }
 
-        logger.info(`Giveaway creation started by ${interaction.user.tag} in guild ${interaction.guildId}`);
+        logger.info(`Начался розыгрыш от ${interaction.user.tag} in guild ${interaction.guildId}`);
 
         const durationString = interaction.options.getString("duration");
-        const winnerCount = interaction.options.getInteger("winners");
-        const prize = interaction.options.getString("prize");
-        const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
+        const winnerCount = interaction.options.getInteger("Победители");
+        const prize = interaction.options.getString("приз");
+        const targetChannel = interaction.options.getChannel("канал") || interaction.channel;
 
         const durationMs = parseDuration(durationString);
         validateWinnerCount(winnerCount);
@@ -116,7 +116,7 @@ export default {
         const row = createGiveawayButtons(false);
 
         const giveawayMessage = await targetChannel.send({
-            content: "🎉 **NEW GIVEAWAY** 🎉",
+            content: "🎉 **Начат розыгрыш** 🎉",
             embeds: [embed],
             components: [row],
         });
@@ -138,12 +138,12 @@ export default {
                 guildId: interaction.guildId,
                 eventType: EVENT_TYPES.GIVEAWAY_CREATE,
                 data: {
-                    description: `Giveaway created: ${prizeName}`,
+                    description: `Приз: ${prizeName}`,
                     channelId: targetChannel.id,
                     userId: interaction.user.id,
                     fields: [
                         {
-                            name: 'Prize',
+                            name: 'priz',
                             value: prizeName,
                             inline: true
                         },
@@ -174,7 +174,7 @@ export default {
         await InteractionHelper.safeReply(interaction, {
             embeds: [
                 successEmbed(
-                    `Giveaway Started! 🎉`,
+                    `Розыгрыш начатэ 🎉`,
                     `A new giveaway for **${prizeName}** has been started in ${targetChannel} and will end in **${durationString}**.`,
                 ),
             ],
