@@ -1,118 +1,123 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { formatDistanceToNow } = require('date-fns');
-const ruLocale = require('date-fns/locale/ru');
+import { InteractionHelper } from '../../utils/interactionHelper.js';
 
-module.exports = {
+export default {
     data: new SlashCommandBuilder()
-        .setName('serverinfo')
-        .setDescription('Информация о сервере (как в Bloody Dynastу)'),
+    .setName("serverinfo")
+    .setDescription("Получить подробную информацию о сервере"),
 
-    async execute(interaction) {
-        const guild = interaction.guild;
-
-        const totalMembers = guild.memberCount;
-        const humans = guild.members.cache.filter(member => !member.user.bot).size;
-        const bots = totalMembers - humans;
-
-        const textChannels = guild.channels.cache.filter(c => c.type === 0).size;
-        const voiceChannels = guild.channels.cache.filter(c => c.type === 2).size;
-        const categories = guild.channels.cache.filter(c => c.type === 4).size;
-        const totalChannels = textChannels + voiceChannels + categories;
-
-        const rolesCount = guild.roles.cache.size;
-        const emojisCount = guild.emojis.cache.size;
-        const boostLevel = guild.premiumTier;
-        const boostCount = guild.premiumSubscriptionCount || 0;
-
-        const verificationLevels = {
-            0: 'Нет',
-            1: 'Низкий',
-            2: 'Средний',
-            3: 'Высокий',
-            4: 'Очень высокий'
-        };
-        const verification = verificationLevels[guild.verificationLevel] || 'Неизвестно';
-
-        const age = formatDistanceToNow(guild.createdAt, { addSuffix: true, locale: ruLocale });
-
-        let ownerTag = 'Неизвестно';
-        try {
-            const owner = await guild.fetchOwner();
-            ownerTag = owner.user.tag;
-        } catch (e) {}
-
-        const embed = new EmbedBuilder()
-            .setTitle('\uD83D\uDCCA Результаты разведки сервера') // 📊
-            .setDescription(`${guild.name} — вот что удалось узнать!`)
-            .setColor(0x8B00FF)
-            .setThumbnail(guild.iconURL({ size: 512 }))
-            .addFields(
-                { name: '\uD83D\uDD19 ID сервера', value: `${guild.id}`, inline: false }, // 🆔
-                {
-                    name: '\uD83D\uDC51 Владелец', // 👑
-                    value: guild.ownerId ? `<@${guild.ownerId}>\n\`${ownerTag}\`` : 'Неизвестно',
-                    inline: false
-                },
-                {
-                    name: '\uD83D\uDCC5 Создан', // 📅
-                    value: `${guild.createdAt.toLocaleDateString('ru-RU', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    })}, ${guild.createdAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}\n\u23F0 Возраст сервера: ${age}`, // ⏰
-                    inline: false
-                },
-                {
-                    name: '\uD83D\uDC65 Участников', // 👥
-                    value: `${totalMembers} всего\n${humans} людей\n${bots} ботов`,
-                    inline: true
-                },
-                {
-                    name: '\uD83D\uDCFA Каналов', // 📺
-                    value: `${totalChannels} всего\n${textChannels} текстовых\n${voiceChannels} голосовых\n${categories} категорий`,
-                    inline: true
-                },
-                {
-                    name: '\uD83C\uDFA8 Ролей', // 🎨
-                    value: `${rolesCount}`,
-                    inline: true
-                },
-                {
-                    name: '\uD83D\uDE04 Эмодзи', // 😄
-                    value: `${emojisCount}`,
-                    inline: true
-                },
-                {
-                    name: '\uD83D\uDC8E Уровень бустов', // 💎
-                    value: `Уровень ${boostLevel}\n${boostCount} бустов`,
-                    inline: true
-                },
-                {
-                    name: '\uD83D\uDEE1\uFE0F Уровень проверки', // 🛡️
-                    value: `${verification}`,
-                    inline: true
-                }
-            );
-
-        if (guild.description) {
-            embed.addFields({ name: '\uD83D\uDCDD Описание', value: guild.description, inline: false }); // 📝
-        } else {
-            embed.addFields({
-                name: '\uD83D\uDCDD Описание',
-                value: 'CRMP PROJECT',
-                inline: false
-            });
-        }
-
-        embed.setFooter({
-            text: `Запросил: ${interaction.user.tag}`,
-            iconURL: interaction.user.displayAvatarURL()
-        });
-
-        await interaction.reply({ embeds: [embed] });
+  async execute(interaction) {
+    const deferSuccess = await InteractionHelper.safeDefer(interaction);
+    if (!deferSuccess) {
+      logger.warn(`ServerInfo interaction defer failed`, {
+        userId: interaction.user.id,
+        guildId: interaction.guildId,
+        commandName: 'serverinfo'
+      });
+      return;
     }
+
+    const guild = interaction.guild;
+    const owner = await guild.fetchOwner();
+    const createdTimestamp = Math.floor(guild.createdAt.getTime() / 1000);
+
+    // Статистика участников
+    const totalMembers = guild.memberCount;
+    const members = guild.members.cache;
+    const botCount = members.filter(m => m.user.bot).size;
+    const humanCount = totalMembers - botCount;
+
+    // Статусы (онлайн, бездействует, не беспокоить, оффлайн) — только для закешированных участников
+    const statuses = {
+      online: members.filter(m => m.presence?.status === 'online').size,
+      idle: members.filter(m => m.presence?.status === 'idle').size,
+      dnd: members.filter(m => m.presence?.status === 'dnd').size,
+      offline: members.filter(m => !m.presence || m.presence.status === 'offline').size
+    };
+
+    // Каналы
+    const channels = guild.channels.cache;
+    const textChannels = channels.filter(c => c.type === 0).size; // GUILD_TEXT
+    const voiceChannels = channels.filter(c => c.type === 2).size; // GUILD_VOICE
+    const categoryChannels = channels.filter(c => c.type === 4).size; // GUILD_CATEGORY
+    const newsChannels = channels.filter(c => c.type === 5).size; // GUILD_NEWS
+    const stageChannels = channels.filter(c => c.type === 13).size; // GUILD_STAGE_VOICE
+
+    // Эмодзи
+    const emojis = guild.emojis.cache;
+    const totalEmojis = emojis.size;
+    const animatedEmojis = emojis.filter(e => e.animated).size;
+    const staticEmojis = totalEmojis - animatedEmojis;
+
+    // Бусты
+    const boostLevel = guild.premiumTier;
+    const boostCount = guild.premiumSubscriptionCount;
+
+    // Баннер (если есть)
+    const bannerUrl = guild.bannerURL({ size: 1024 });
+
+    // Создаём embed
+    const embed = createEmbed({ 
+      title: `📊 Информация о сервере: ${guild.name}`,
+      description: `🆔 **ID:** ${guild.id}`,
+      color: 0x2B2D31,
+      thumbnail: guild.iconURL({ size: 256 })
+    });
+
+    // Добавляем баннер как изображение, если есть
+    if (bannerUrl) {
+      embed.setImage(bannerUrl);
+    }
+
+    // Поля с эмодзи
+    embed.addFields(
+      { name: '👑 Владелец', value: `${owner.user.tag} (${owner.id})`, inline: true },
+      { name: '📅 Дата создания', value: `<t:${createdTimestamp}:R>`, inline: true },
+      { name: '🌐 Регион', value: guild.preferredLocale || 'Не указан', inline: true },
+      { name: '\u200b', value: '\u200b', inline: false }, // разделитель
+      { name: '👥 Участники', value: [
+        `**Всего:** ${totalMembers}`,
+        `👤 Люди: ${humanCount}`,
+        `🤖 Боты: ${botCount}`
+      ].join('\n'), inline: true },
+      { name: '🟢 Статусы (кеш)', value: [
+        `🟢 Онлайн: ${statuses.online}`,
+        `🟡 Бездействует: ${statuses.idle}`,
+        `🔴 Не беспокоить: ${statuses.dnd}`,
+        `⚫ Оффлайн/неизвестно: ${statuses.offline}`
+      ].join('\n'), inline: true },
+      { name: '\u200b', value: '\u200b', inline: true },
+      { name: '📁 Каналы', value: [
+        `**Всего:** ${channels.size}`,
+        `💬 Текстовые: ${textChannels}`,
+        `🔊 Голосовые: ${voiceChannels}`,
+        `📂 Категории: ${categoryChannels}`,
+        `📰 Новостные: ${newsChannels}`,
+        `🎤 Сцена: ${stageChannels}`
+      ].join('\n'), inline: true },
+      { name: '🎭 Роли', value: `**Всего:** ${guild.roles.cache.size}`, inline: true },
+      { name: '😀 Эмодзи', value: [
+        `**Всего:** ${totalEmojis}`,
+        `✨ Обычные: ${staticEmojis}`,
+        `🎞️ Анимированные: ${animatedEmojis}`
+      ].join('\n'), inline: true },
+      { name: '\u200b', value: '\u200b', inline: false },
+      { name: '💎 Бусты', value: [
+        `**Уровень:** ${boostLevel} (${boostCount} бустов)`,
+        `⏳ Следующий уровень: ${boostLevel < 3 ? `ещё ${[2, 7, 14][boostLevel] - boostCount} бустов` : 'достигнут максимум'}`
+      ].join('\n'), inline: true },
+      { name: '🔒 Уровень проверки', value: `${guild.verificationLevel} (${['Нет', 'Низкий', 'Средний', 'Высокий', 'Максимальный'][guild.verificationLevel] || 'Неизвестно'})`, inline: true },
+      { name: '📢 Уровень явного контента', value: `${guild.explicitContentFilter} (${['Отключён', 'Сканировать без роли', 'Сканировать всех'][guild.explicitContentFilter] || 'Неизвестно'})`, inline: true }
+    );
+
+    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
+    logger.info(`ServerInfo command executed`, {
+      userId: interaction.user.id,
+      guildId: guild.id,
+      guildName: guild.name,
+      memberCount: guild.memberCount
+    });
+  },
 };
