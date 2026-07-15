@@ -139,24 +139,33 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
         const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active');
         
         const embed = new EmbedBuilder()
-            .setTitle(`${statusEmoji} ${giveaway.prize}`)
-            .setDescription('React with the button below to enter!')
             .setColor(color)
-            .addFields(
-                { name: '👤 Hosted by', value: `<@${giveaway.hostId}>`, inline: true },
-                { name: '🏆 Winners', value: giveaway.winnerCount.toString(), inline: true },
-                { name: '👥 Entries', value: giveaway.participants?.length?.toString() || '0', inline: true }
-            );
+            .setTitle(prize || "🎁 Розыгрыш")
+            .setDescription(
+                `🎯 **Организатор:** <@${giveaway.hostId}>\n` +
+                `🏆 **Победители:** ${giveaway.winnerCount}\n` +
+                `👤 **Участники:** ${giveaway.participants?.length || 0}\n` +
+                `🕐 **Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
+            )
+            .setFooter({ text: `ID: ${giveaway.messageId || 'создаётся...'}` })
+            .setTimestamp();
 
         if (isEnded) {
             const winnerDisplay = winners.length > 0 
                 ? winners.map(id => `<@${id}>`).join(', ')
-                : 'No valid entries';
-            embed.addFields({ name: '🎯 Winners', value: winnerDisplay, inline: false });
-        } else {
-            const endTime = giveaway.endsAt || giveaway.endTime;
-            embed.addFields({ name: '⏰ Ends', value: `<t:${Math.floor(endTime / 1000)}:R>`, inline: false });
+                : 'Нет участников';
+            embed.addFields({ name: '🏆 Победители', value: winnerDisplay, inline: false });
         }
+
+        return embed;
+    } catch (error) {
+        logger.error('Ошибка создания embed для розыгрыша:', error);
+        return new EmbedBuilder()
+            .setColor(0xFF0000)
+            .setTitle('⚠️ Ошибка')
+            .setDescription('Не удалось создать embed розыгрыша');
+    }
+}
 
         embed.setTimestamp();
         
@@ -172,48 +181,29 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
     }
 }
 
-export function createGiveawayButtons(ended = false) {
-    try {
-        const row = new ActionRowBuilder();
-
-        if (ended) {
-            row.addComponents(
+export function createGiveawayButtons(isEnded = false) {
+    if (isEnded) {
+        return new ActionRowBuilder()
+            .addComponents(
                 new ButtonBuilder()
-                    .setCustomId('giveaway_reroll')
-                    .setLabel('🎲 Reroll')
+                    .setCustomId('giveaway_ended')
+                    .setLabel('🏁 Завершён')
                     .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(false),
-                new ButtonBuilder()
-                    .setCustomId('giveaway_view')
-                    .setLabel('👁️ View Winners')
-                    .setStyle(ButtonStyle.Primary)
-                    .setDisabled(false)
+                    .setDisabled(true)
             );
-        } else {
-            row.addComponents(
-                new ButtonBuilder()
-                    .setCustomId('giveaway_join')
-                    .setLabel('🎉 Join')
-                    .setStyle(ButtonStyle.Primary)
-                    .setDisabled(false),
-                new ButtonBuilder()
-                    .setCustomId('giveaway_end')
-                    .setLabel('🛑 End')
-                    .setStyle(ButtonStyle.Danger)
-                    .setDisabled(false)
-            );
-        }
-
-        return row;
-    } catch (error) {
-        logger.error('Error creating giveaway buttons:', error);
-        throw new TitanBotError(
-            'Failed to create giveaway buttons',
-            ErrorTypes.UNKNOWN,
-            'An internal error occurred while creating interactive buttons.',
-            { error: error.message }
-        );
     }
+
+    return new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('giveaway_join')
+                .setLabel('🎉 Участвовать')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('giveaway_entries')
+                .setLabel('👤 Участники')
+                .setStyle(ButtonStyle.Secondary)
+        );
 }
 
 export function selectWinners(participants, winnerCount) {
