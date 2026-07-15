@@ -8,7 +8,7 @@ const ruLocale = require('date-fns/locale/ru');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('serverinfo')
-        .setDescription('Информация о сервере (как в Bloody Dynasty)'),
+        .setDescription('Информация о сервере (как в Bloody Dynastу)'),
 
     async execute(interaction) {
         const guild = interaction.guild;
