@@ -56,6 +56,8 @@ export default {
 
     return runWithTraceContext(interactionTraceContext, async () => {
       try {
+        await handleButtons(interaction);
+        
         InteractionHelper.patchInteractionResponses(interaction);
         ResponseCoordinator.attach(interaction);
 
