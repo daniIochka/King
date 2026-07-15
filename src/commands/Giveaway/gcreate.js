@@ -21,7 +21,7 @@ const GIVEAWAY_MAX_WINNERS = botConfig.giveaways?.maximumWinners ?? 10;
 export default {
     data: new SlashCommandBuilder()
         .setName("gcreate")
-        .setDescription("🎉 Запускает новый розыгрыш в указанном канале.")
+        .setDescription("🎉 Запускает новый розыгрыш в указанном канал.")
         .addStringOption((option) =>
             option
                 .setName("длительность")
