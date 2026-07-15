@@ -154,7 +154,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             const winnerDisplay = winners.length > 0 
                 ? winners.map(id => `<@${id}>`).join(', ')
                 : 'Нет участников';
-            embed.addFields({ name: '🏆 Победители', value: win bnerDisplay, inline: false });
+            embed.addFields({ name: '🏆 Победители', value: winnerDisplay, inline: false });
         }
 
         return embed;
