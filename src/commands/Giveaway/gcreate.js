@@ -40,10 +40,10 @@ export default {
             return interaction.editReply({ content: "❌ Эту команду можно использовать только на сервере." });
         }
 
-        const durationString = interaction.options.getString("duration");
-        const winnerCount = interaction.options.getInteger("winners");
-        const prize = interaction.options.getString("prize");
-        const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
+        const durationString = interaction.options.getString("длительность");
+        const winnerCount = interaction.options.getInteger("победители");
+        const prize = interaction.options.getString("приз");
+        const targetChannel = interaction.options.getChannel("канал") || interaction.channel;
 
         const giveawayEmbed = new EmbedBuilder()
             .setTitle("🎉 РОЗЫГРЫШ 🎉")
