@@ -24,7 +24,7 @@ export default {
         .setDescription("🎉 Запускает новый розыгрыш в указанном канале.")
         .addStringOption((option) =>
             option
-                .setName("duration")
+                .setName("длительность")
                 .setDescription(
                     "Как долго должен длиться розыгрыш (например, 1ч, 30м, 5д).",
                 )
@@ -32,7 +32,7 @@ export default {
         )
         .addIntegerOption((option) =>
             option
-                .setName("winners")
+                .setName("победители")
                 .setDescription("Количество победителей.")
                 .setMinValue(GIVEAWAY_MIN_WINNERS)
                 .setMaxValue(GIVEAWAY_MAX_WINNERS)
@@ -40,13 +40,13 @@ export default {
         )
         .addStringOption((option) =>
             option
-                .setName("prize")
+                .setName("приз")
                 .setDescription("Приз, который разыгрывается.")
                 .setRequired(true),
         )
         .addChannelOption((option) =>
             option
-                .setName("channel")
+                .setName("канал")
                 .setDescription("Канал для отправки розыгрыша (по умолчанию текущий канал).")
                 .addChannelTypes(ChannelType.GuildText)
                 .setRequired(false),
@@ -77,7 +77,7 @@ export default {
         logger.info(`Создание розыгрыша начато пользователем ${interaction.user.tag} на сервере ${interaction.guildId}`);
 
         const durationString = interaction.options.getString("duration");
-        const winnerCount = interaction.options.getInteger("winners");
+        const winnersCount = interaction.options.getInteger("winners");
         const prize = interaction.options.getString("prize");
         const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
 
@@ -115,7 +115,7 @@ export default {
         const row = createGiveawayButtons(false);
 
         const giveawayMessage = await targetChannel.send({
-            content: "🎉 **РОЗЫГРЫШ** 🎉",
+            content: "<@&1526907361313165412>",
             embeds: [embed],
             components: [row],
         });
@@ -138,8 +138,8 @@ export default {
                 eventType: EVENT_TYPES.GIVEAWAY_CREATE,
                 data: {
                     description: `Розыгрыш создан: ${prizeName}`,
-                    channelId: targetChannel.id,
-                    userId: interaction.user.id,
+                    канал: targetChannel.id,
+                    Кто создал: interaction.user.id,
                     fields: [
                         {
                             name: '🎁 Приз',
