@@ -88,5 +88,5 @@ async def giveaway(interaction: discord.Interaction, приз: str, победи
     # Отправляем сообщение с карточкой и кнопками
     await interaction.response.send_message(embed=embed, view=view)
 
-bot.run("MTUyNjYyNzYxNzQ2MDA2MDMyMQ.GJxK1S.x17F_DcVu7j0vctbN-E_WErPHySKIGkVcqxFjo")
+bot.run("DISCORD_TOKEN")
       
