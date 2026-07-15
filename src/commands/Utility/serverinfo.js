@@ -100,7 +100,7 @@ export default {
       { name: '🎭 Роли', value: `**Всего:** ${guild.roles.cache.size}`, inline: true },
       { name: '😀 Эмодзи', value: [
         `**Всего:** ${totalEmojis}`,
-        `✨ Обычные: ${staticEmojis}`,
+        `💫 Обычные: ${staticEmojis}`,
         `🎞️ Анимированные: ${animatedEmojis}`
       ].join('\n'), inline: true },
       { name: '\u200b', value: '\u200b', inline: false },
