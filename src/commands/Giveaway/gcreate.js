@@ -21,31 +21,31 @@ const GIVEAWAY_MAX_WINNERS = botConfig.giveaways?.maximumWinners ?? 10;
 export default {
     data: new SlashCommandBuilder()
         .setName("gcreate")
-        .setDescription("Запустить новый розыгрыш в указанном канале.")
+        .setDescription("Starts a new giveaway in a specified channel.")
         .addStringOption((option) =>
             option
-                .setName("время")
-                .setDescription("Длительность розыгрыша (например: 1h, 30m, 5d).")
+                .setName("duration")
+                .setDescription("How long the giveaway should last (e.g., 1h, 30m, 5d).")
                 .setRequired(true),
         )
         .addIntegerOption((option) =>
             option
-                .setName("победители")
-                .setDescription("Количество призовых мест.")
+                .setName("winners")
+                .setDescription("The number of winners to pick.")
                 .setMinValue(GIVEAWAY_MIN_WINNERS)
                 .setMaxValue(GIVEAWAY_MAX_WINNERS)
                 .setRequired(true),
         )
         .addStringOption((option) =>
             option
-                .setName("приз")
-                .setDescription("Что разыгрывается в конкурсе.")
+                .setName("prize")
+                .setDescription("The prize being given away.")
                 .setRequired(true),
         )
         .addChannelOption((option) =>
             option
-                .setName("канал")
-                .setDescription("Канал для отправки (по умолчанию текущий).")
+                .setName("channel")
+                .setDescription("The channel to send the giveaway to (defaults to current channel).")
                 .addChannelTypes(ChannelType.GuildText)
                 .setRequired(false),
         )
@@ -74,10 +74,10 @@ export default {
 
         logger.info(`Начался розыгрыш от ${interaction.user.tag} на сервере ${interaction.guildId}`);
 
-        const durationString = interaction.options.getString("время");
-        const winnerCount = interaction.options.getInteger("победители");
-        const prize = interaction.options.getString("приз");
-        const targetChannel = interaction.options.getChannel("канал") || interaction.channel;
+        const durationString = interaction.options.getString("duration");
+        const winnerCount = interaction.options.getInteger("winners");
+        const prize = interaction.options.getString("prize");
+        const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
 
         const durationMs = parseDuration(durationString);
         validateWinnerCount(winnerCount);
@@ -112,7 +112,7 @@ export default {
         const embed = createGiveawayEmbed(initialGiveawayData, "active");
         const row = createGiveawayButtons(false);
 
-        // Текст сообщения изменен под стиль вашего скриншота
+        // Текст над эмбедом полностью по скриншоту с праздничными хлопушками
         const giveawayMessage = await targetChannel.send({
             content: "🎉 **РОЗЫГРЫШ** 🎉",
             embeds: [embed],
@@ -151,12 +151,12 @@ export default {
                             inline: true
                         },
                         {
-                            name: '🕐 Длительность',
+                            name: '⏱️ Длительность',
                             value: durationString,
                             inline: true
                         },
                         {
-                            name: 'Канал',
+                            name: '📺 Канал',
                             value: targetChannel.toString(),
                             inline: true
                         }
@@ -173,11 +173,10 @@ export default {
             embeds: [
                 successEmbed(
                     `Розыгрыш успешно запущен 🎉`,
-                    `Новый розыгрыш приза **${prizeName}** начат в канале ${targetChannel} и завершится через **${durationString}**.`,
+                    `Новый конкурс на приз **${prizeName}** начат в канале ${targetChannel} и завершится через **${durationString}**.`,
                 ),
             ],
             flags: MessageFlags.Ephemeral,
         });
     },
 };
-                
