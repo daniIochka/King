@@ -1,181 +1,89 @@
-import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, MessageFlags } from 'discord.js';
-import { errorEmbed, successEmbed } from '../../utils/embeds.js';
-import { logger } from '../../utils/logger.js';
-import { TitanBotError, ErrorTypes } from '../../utils/errorHandler.js';
-import { saveGiveaway } from '../../utils/giveaways.js';
-import { 
-    parseDuration, 
-    validatePrize, 
-    validateWinnerCount,
-    createGiveawayEmbed, 
-    createGiveawayButtons 
-} from '../../services/giveawayService.js';
-import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
-
-import { botConfig } from '../../config/bot.js';
-
-const GIVEAWAY_MIN_WINNERS = botConfig.giveaways?.minimumWinners ?? 1;
-const GIVEAWAY_MAX_WINNERS = botConfig.giveaways?.maximumWinners ?? 10;
+                    import { SlashCommandBuilder, PermissionFlagsBits, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 
 export default {
     data: new SlashCommandBuilder()
         .setName("gcreate")
-        .setDescription("Starts a new giveaway in a specified channel.")
+        .setDescription("Запустить новый розыгрыш в канале.")
         .addStringOption((option) =>
             option
-                .setName("duration")
-                .setDescription("How long the giveaway should last (e.g., 1h, 30m, 5d).")
+                .setName("длительность")
+                .setDescription("Длительность розыгрыша (например: 1h, 30m).")
                 .setRequired(true),
         )
         .addIntegerOption((option) =>
             option
-                .setName("winners")
-                .setDescription("The number of winners to pick.")
-                .setMinValue(GIVEAWAY_MIN_WINNERS)
-                .setMaxValue(GIVEAWAY_MAX_WINNERS)
+                .setName("победители")
+                .setDescription("Количество победителей.")
+                .setMinValue(1)
+                .setMaxValue(100)
                 .setRequired(true),
         )
         .addStringOption((option) =>
             option
-                .setName("prize")
-                .setDescription("The prize being given away.")
+                .setName("приз")
+                .setDescription("Приз розыгрыша.")
                 .setRequired(true),
         )
         .addChannelOption((option) =>
             option
-                .setName("channel")
-                .setDescription("The channel to send the giveaway to (defaults to current channel).")
+                .setName("канал")
+                .setDescription("Канал для отправки (по умолчанию текущий).")
                 .addChannelTypes(ChannelType.GuildText)
                 .setRequired(false),
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction) {
-        // ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ МЕТОД ВМЕСТО INTERACTIONHELPER
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await interaction.deferReply({ ephemeral: true });
 
         if (!interaction.inGuild()) {
-            throw new TitanBotError(
-                'Giveaway command used outside guild',
-                ErrorTypes.VALIDATION,
-                'Эту команду можно использовать только на сервере.',
-                { userId: interaction.user.id }
-            );
+            return interaction.editReply({ content: "❌ Эту команду можно использовать только на сервере." });
         }
-
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            throw new TitanBotError(
-                'User lacks ManageGuild permission',
-                ErrorTypes.PERMISSION,
-                "У вас недостаточно прав. Требуется разрешение 'Управление сервером'.",
-                { userId: interaction.user.id, guildId: interaction.guildId }
-            );
-        }
-
-        logger.info(`Начался розыгрыш от ${interaction.user.tag} на сервере ${interaction.guildId}`);
 
         const durationString = interaction.options.getString("duration");
         const winnerCount = interaction.options.getInteger("winners");
         const prize = interaction.options.getString("prize");
         const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
 
-        const durationMs = parseDuration(durationString);
-        validateWinnerCount(winnerCount);
-        const prizeName = validatePrize(prize);
-
-        if (!targetChannel.isTextBased()) {
-            throw new TitanBotError(
-                'Target channel is not text-based',
-                ErrorTypes.VALIDATION,
-                'Указанный канал должен быть текстовым.',
-                { channelId: targetChannel.id, channelType: targetChannel.type }
+        const giveawayEmbed = new EmbedBuilder()
+            .setTitle("🎉 РОЗЫГРЫШ 🎉")
+            .setColor("#FEE75C") 
+            .setDescription(
+                `🎁 **Приз**\n${prize}\n\n` +
+                `🏆 **Победителей**\n${winnerCount}\n\n` +
+                `👤 **Участников**\n0\n\n` +
+                `🎯 **Организатор**\n${interaction.user}\n\n` +
+                `*Нажмите кнопку ниже, чтобы участвовать!*`
             );
-        }
-
-        const endTime = Date.now() + durationMs;
-
-        const initialGiveawayData = {
-            messageId: "placeholder",
-            channelId: targetChannel.id,
-            guildId: interaction.guildId,
-            prize: prizeName,
-            hostId: interaction.user.id,
-            endTime: endTime,
-            endsAt: endTime,
-            winnerCount: winnerCount,
-            participants: [],
-            isEnded: false,
-            ended: false,
-            createdAt: new Date().toISOString()
-        };
-
-        const embed = createGiveawayEmbed(initialGiveawayData, "active");
-        const row = createGiveawayButtons(false);
-
-        const giveawayMessage = await targetChannel.send({
-            content: "🎉 **РОЗЫГРЫШ** 🎉",
-            embeds: [embed],
-            components: [row],
-        });
-
-        initialGiveawayData.messageId = giveawayMessage.id;
-        const saved = await saveGiveaway(
-            interaction.client,
-            interaction.guildId,
-            initialGiveawayData,
+        
+        const buttonsRow = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("giveaway_join")
+                .setLabel("Участвовать")
+                .setEmoji("🎉")
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId("giveaway_leave")
+                .setLabel("Выйти")
+                .setEmoji("❌")
+                .setStyle(ButtonStyle.Danger) // 
         );
 
-        if (!saved) {
-            logger.warn(`Не удалось сохранить розыгрыш в базу данных: ${giveawayMessage.id}`);
-        }
-
         try {
-            await logEvent({
-                client: interaction.client,
-                guildId: interaction.guildId,
-                eventType: EVENT_TYPES.GIVEAWAY_CREATE,
-                data: {
-                    description: `🎁 Приз: ${prizeName}`,
-                    channelId: targetChannel.id,
-                    userId: interaction.user.id,
-                    fields: [
-                        {
-                            name: '🎁 Приз',
-                            value: prizeName,
-                            inline: true
-                        },
-                        {
-                            name: '🏆 Победителей',
-                            value: winnerCount.toString(),
-                            inline: true
-                        },
-                        {
-                            name: '⏱️ Длительность',
-                            value: durationString,
-                            inline: true
-                        },
-                        {
-                            name: '📺 Канал',
-                            value: targetChannel.toString(),
-                            inline: true
-                        }
-                    ]
-                }
+            await targetChannel.send({
+                content: "🎉 **РОЗЫГРЫШ** 🎉",
+                embeds: [giveawayEmbed],
+                components: [buttonsRow],
             });
-        } catch (logError) {
-            logger.debug('Ошибка логирования создания розыгрыша:', logError);
+
+            await interaction.editReply({
+                content: `✅ Розыгрыш приза **${prize}** успешно запущен в канале ${targetChannel}!`,
+            });
+        } catch (error) {
+            console.error("Ошибка при отправке розыгрыша:", error);
+            await interaction.editReply({
+                content: "❌ Произошла ошибка при отправке сообщения в канал. Проверьте права бота.",
+            });
         }
-
-        logger.info(`Розыгрыш успешно запущен: ${giveawayMessage.id} в канале ${targetChannel.name}`);
-
-        // ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ МЕТОД EDTREPLY ВМЕСТО INTERACTIONHELPER
-        await interaction.editReply({
-            embeds: [
-                successEmbed(
-                    `Розыгрыш успешно запущен 🎉`,
-                    `Новый конкурс на приз **${prizeName}** начат в канале ${targetChannel} и завершится через **${durationString}**.`,
-                ),
-            ],
-        });
     },
 };
