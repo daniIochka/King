@@ -21,10 +21,10 @@ const GIVEAWAY_MAX_WINNERS = botConfig.giveaways?.maximumWinners ?? 10;
 export default {
     data: new SlashCommandBuilder()
         .setName("gcreate")
-        .setDescription("🎉 Запускает новый розыгрыш в указанном канал.")
+        .setDescription("Запускает новый розыгрыш в указанном канале.")
         .addStringOption((option) =>
             option
-                .setName("длительность")
+                .setName("duration")
                 .setDescription(
                     "Как долго должен длиться розыгрыш (например, 1ч, 30м, 5д).",
                 )
@@ -32,7 +32,7 @@ export default {
         )
         .addIntegerOption((option) =>
             option
-                .setName("победители")
+                .setName("winners")
                 .setDescription("Количество победителей.")
                 .setMinValue(GIVEAWAY_MIN_WINNERS)
                 .setMaxValue(GIVEAWAY_MAX_WINNERS)
@@ -40,13 +40,13 @@ export default {
         )
         .addStringOption((option) =>
             option
-                .setName("приз")
+                .setName("prize")
                 .setDescription("Приз, который разыгрывается.")
                 .setRequired(true),
         )
         .addChannelOption((option) =>
             option
-                .setName("канал")
+                .setName("channel")
                 .setDescription("Канал для отправки розыгрыша (по умолчанию текущий канал).")
                 .addChannelTypes(ChannelType.GuildText)
                 .setRequired(false),
@@ -54,6 +54,7 @@ export default {
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction) {
+        // Отложенный ответ: отправка сообщения о розыгрыше + запись в БД могут превысить 3-секундное окно
         await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
 
         if (!interaction.inGuild()) {
@@ -77,7 +78,7 @@ export default {
         logger.info(`Создание розыгрыша начато пользователем ${interaction.user.tag} на сервере ${interaction.guildId}`);
 
         const durationString = interaction.options.getString("duration");
-        const winnersCount = interaction.options.getInteger("winners");
+        const winnerCount = interaction.options.getInteger("winners");
         const prize = interaction.options.getString("prize");
         const targetChannel = interaction.options.getChannel("channel") || interaction.channel;
 
@@ -138,26 +139,26 @@ export default {
                 eventType: EVENT_TYPES.GIVEAWAY_CREATE,
                 data: {
                     description: `Розыгрыш создан: ${prizeName}`,
-                    канал: targetChannel.id,
-                    Кто создал: interaction.user.id,
+                    channelId: targetChannel.id,
+                    userId: interaction.user.id,
                     fields: [
                         {
-                            name: '🎁 Приз',
+                            name: 'Приз',
                             value: prizeName,
                             inline: true
                         },
                         {
-                            name: '🏆 Победители',
+                            name: 'Победители',
                             value: winnerCount.toString(),
                             inline: true
                         },
                         {
-                            name: '🕐 Длительность',
+                            name: 'Длительность',
                             value: durationString,
                             inline: true
                         },
                         {
-                            name: '🗒️ Канал',
+                            name: 'Канал',
                             value: targetChannel.toString(),
                             inline: true
                         }
