@@ -136,25 +136,28 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
     try {
         const statusEmoji = status === 'ended' ? '🎉' : status === 'reroll' ? '🔄' : '🎉';
         const isEnded = status === 'ended' || status === 'reroll';
-        const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active')
+        const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active');
         const embed = new EmbedBuilder()
-        return embed;
-        this.embed.setColor(color)
-            .setTitle(prize || "🎁 Розыгрыш")
+            .setColor(color)
+            .setTitle(giveaway.prize || "🎁 Розыгрыш")
             .setDescription(
-                `🎯 **Организатор:** <@${giveaway.hostId}>\n` +
-                `🏆 **Победители:** ${giveaway.winnerCount}\n` +
-                `👤 **Участники:** ${giveaway.participants?.length || 0}\n` +
-                `🕐 **Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
+                `**🎯 Организатор:** <@${giveaway.hostId}>\n\n` +
+                `**🏆 Победителей:** ${giveaway.winnerCount}\n\n` +
+                `**👤 Участников:** ${giveaway.participants?.length || 0}\n\n` +
+                `**🕐 Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
             )
-            .setFooter({ text: `ID: ${giveaway.messageId || 'создаётся...'}` })
+            .setFooter({ text: `ID: ${giveaway.messageId} | создаётся...` })
             .setTimestamp();
 
         if (isEnded) {
-            const winnerDisplay = winners.length > 0 
-                ? winners.map(id => `<@${id}>`).join(', ')
-                : 'Нет участников';
-            embed.addFields({ name: '🏆 Победители', value: winnerDisplay, inline: false });
+            const winnerDisplay = winners.length > 0
+                ? winners.map(id => `🎉 <@${id}>`).join('\n')
+                : 'Нет участников!';
+            embed.addFields({
+                name: 'Победители',
+                value: winnerDisplay,
+                inline: false
+            });
         }
 
         return embed;
@@ -164,20 +167,6 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             .setColor(0xFF0000)
             .setTitle('⚠️ Ошибка')
             .setDescription('Не удалось создать embed розыгрыша');
-    }
-}
-
-        embed.setTimestamp();
-        
-        export default embed;
-    } catch (error) {
-        logger.error('Error creating giveaway embed:', error);
-        throw new TitanBotError(
-            'Failed to create giveaway embed',
-            ErrorTypes.UNKNOWN,
-            'An internal error occurred while formatting the giveaway.',
-            { error: error.message }
-        );
     }
 }
 
