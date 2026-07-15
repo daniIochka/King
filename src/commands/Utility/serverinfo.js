@@ -1,58 +1,134 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { createEmbed } from '../../utils/embeds.js';
-import { logger } from '../../utils/logger.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { formatDistanceToNow } from 'date-fns';
+import ruLocale from 'date-fns/locale/ru';
 
-export default {
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { formatDistanceToNow } = require('date-fns');
+const ruLocale = require('date-fns/locale/ru');
+
+module.exports = {
     data: new SlashCommandBuilder()
-    .setName("serverinfo")
-    .setDescription("Получить подробную информацию о сервере"),
+        .setName('serverinfo')
+        .setDescription('Информация о сервере (как в Bloody Dynasty)'),
 
-  async execute(interaction) {
-    const deferSuccess = await InteractionHelper.safeDefer(interaction);
-    if (!deferSuccess) {
-      logger.warn(`ServerInfo interaction defer failed`, {
-        userId: interaction.user.id,
-        guildId: interaction.guildId,
-        commandName: 'serverinfo'
-      });
-      return;
+    async execute(interaction) {
+        const guild = interaction.guild;
+
+        // Подсчёты
+        const totalMembers = guild.memberCount;
+        const humans = guild.members.cache.filter(member => !member.user.bot).size;
+        const bots = totalMembers - humans;
+
+        const textChannels = guild.channels.cache.filter(c => c.type === 0).size;
+        const voiceChannels = guild.channels.cache.filter(c => c.type === 2).size;
+        const categories = guild.channels.cache.filter(c => c.type === 4).size;
+        const totalChannels = textChannels + voiceChannels + categories;
+
+        const rolesCount = guild.roles.cache.size;
+        const emojisCount = guild.emojis.cache.size;
+        const boostLevel = guild.premiumTier;
+        const boostCount = guild.premiumSubscriptionCount || 0;
+
+        // Уровень проверки
+        const verificationLevels = {
+            0: 'Нет',
+            1: 'Низкий',
+            2: 'Средний',
+            3: 'Высокий',
+            4: 'Очень высокий'
+        };
+        const verification = verificationLevels[guild.verificationLevel] || 'Неизвестно';
+
+        // Возраст сервера
+        const age = formatDistanceToNow(guild.createdAt, { addSuffix: true, locale: ruLocale });
+
+        // Владелец
+        let ownerTag = 'Неизвестно';
+        try {
+            const owner = await guild.fetchOwner();
+            ownerTag = owner.user.tag;
+        } catch (e) {
+            // если не удалось получить владельца
+        }
+
+        const embed = new EmbedBuilder()
+            .setTitle('📊 Результаты разведки сервера')
+            .setDescription(`${guild.name} — вот что удалось узнать!`)
+            .setColor(0x8B00FF) // Фиолетовый как у Bloody Dynasty
+            .setThumbnail(guild.iconURL({ size: 512 }))
+            .addFields(
+                { name: '🆔 ID сервера', value: `${guild.id}`, inline: false },
+
+                {
+                    name: '👑 Владелец',
+                    value: guild.ownerId ? `<@${guild.ownerId}>\n\`${ownerTag}\`` : 'Неизвестно',
+                    inline: false
+                },
+
+                {
+                    name: '📅 Создан',
+                    value: `${guild.createdAt.toLocaleDateString('ru-RU', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    })}, ${guild.createdAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}\n⏰ Возраст сервера: ${age}`,
+                    inline: false
+                },
+
+                {
+                    name: '👥 Участников',
+                    value: `${totalMembers} всего\n${humans} людей\n${bots} ботов`,
+                    inline: true
+                },
+
+                {
+                    name: '📺 Каналов',
+                    value: `${totalChannels} всего\n${textChannels} текстовых\n${voiceChannels} голосовых\n${categories} категорий`,
+                    inline: true
+                },
+
+                {
+                    name: '🎨 Ролей',
+                    value: `${rolesCount}`,
+                    inline: true
+                },
+
+                {
+                    name: '😄 Эмодзи',
+                    value: `${emojisCount}`,
+                    inline: true
+                },
+
+                {
+                    name: '💎 Уровень бустов',
+                    value: `Уровень ${boostLevel}\n${boostCount} бустов`,
+                    inline: true
+                },
+
+                {
+                    name: '🛡️ Уровень проверки',
+                    value: `${verification}`,
+                    inline: true
+                }
+            );
+
+        // Описание сервера
+        if (guild.description) {
+            embed.addFields({ name: '📝 Описание', value: guild.description, inline: false });
+        } else {
+            embed.addFields({
+                name: '📝 Описание',
+                value: 'KING MOBILE - CRMP PROJECT'
+                inline: false
+            });
+        }
+
+        embed.setFooter({
+            text: `Запросил: ${interaction.user.tag}`,
+            iconURL: interaction.user.displayAvatarURL()
+        });
+
+        await interaction.reply({ embeds: [embed] });
     }
-
-    const guild = interaction.guild;
-    const owner = await guild.fetchOwner();
-
-    const createdTimestamp = Math.floor(guild.createdAt.getTime() / 1000);
-
-    const embed = createEmbed({ title: `Информация о сервере: ${guild.name}`, description: `ID сервера: ${guild.id}` })
-      .setThumbnail(guild.iconURL({ size: 256 }))
-      .addFields(
-        { name: "Владелец", value: owner.user.tag, inline: true },
-        { name: "Участники", value: `${guild.memberCount}`, inline: true },
-        {
-          name: "Каналы",
-          value: `${guild.channels.cache.size}`,
-          inline: true,
-        },
-        { name: "Роли", value: `${guild.roles.cache.size}`, inline: true },
-        {
-          name: "Бусты",
-          value: `Уровень ${guild.premiumTier} (${guild.premiumSubscriptionCount})`,
-          inline: true,
-        },
-        {
-          name: "Дата создания",
-          value: `<t:${createdTimestamp}:R>`,
-          inline: true,
-        },
-      );
-
-    await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
-    logger.info(`ServerInfo command executed`, {
-      userId: interaction.user.id,
-      guildId: guild.id,
-      guildName: guild.name,
-      memberCount: guild.memberCount
-    });
-  },
 };
