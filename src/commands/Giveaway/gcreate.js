@@ -41,7 +41,7 @@ export default {
         .addStringOption((option) =>
             option
                 .setName("prize")
-                .setDescription("Приз, который разыгрывается.")
+                .setDescription("Приз, который розыгрывается.")
                 .setRequired(true),
         )
         .addChannelOption((option) =>
