@@ -136,9 +136,9 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
     try {
         const statusEmoji = status === 'ended' ? '🎉' : status === 'reroll' ? '🔄' : '🎉';
         const isEnded = status === 'ended' || status === 'reroll';
-        const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active');
-        
+        const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active')
         const embed = new EmbedBuilder()
+        return embed;
             .setColor(color)
             .setTitle(prize || "🎁 Розыгрыш")
             .setDescription(
@@ -154,7 +154,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             const winnerDisplay = winners.length > 0 
                 ? winners.map(id => `<@${id}>`).join(', ')
                 : 'Нет участников';
-            embed.addFields({ name: '🏆 Победители', value: winnerDisplay, inline: false });
+            embed.addFields({ name: '🏆 Победители', value: win bnerDisplay, inline: false });
         }
 
         return embed;
@@ -169,7 +169,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
 
         embed.setTimestamp();
         
-        return embed;
+        export default embed;
     } catch (error) {
         logger.error('Error creating giveaway embed:', error);
         throw new TitanBotError(
