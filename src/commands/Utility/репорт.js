@@ -7,7 +7,7 @@ import reportSetchannel from './modules/report_setchannel.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('report')
+        .setName('репорт')
         .setDescription('Пожаловаться на пользователя администрации сервера или настроить канал для жалоб.')
         .setDMPermission(false)
         .addSubcommand(subcommand =>
