@@ -11,7 +11,6 @@ import {
     createGiveawayButtons 
 } from '../../services/giveawayService.js';
 import { logEvent, EVENT_TYPES } from '../../services/loggingService.js';
-import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 import { botConfig } from '../../config/bot.js';
 
@@ -52,7 +51,8 @@ export default {
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction) {
-        await InteractionHelper.safeDefer(interaction, { flags: MessageFlags.Ephemeral });
+        // ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ МЕТОД ВМЕСТО INTERACTIONHELPER
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         if (!interaction.inGuild()) {
             throw new TitanBotError(
@@ -112,7 +112,6 @@ export default {
         const embed = createGiveawayEmbed(initialGiveawayData, "active");
         const row = createGiveawayButtons(false);
 
-        // Текст над эмбедом полностью по скриншоту с праздничными хлопушками
         const giveawayMessage = await targetChannel.send({
             content: "🎉 **РОЗЫГРЫШ** 🎉",
             embeds: [embed],
@@ -169,14 +168,14 @@ export default {
 
         logger.info(`Розыгрыш успешно запущен: ${giveawayMessage.id} в канале ${targetChannel.name}`);
 
-        await InteractionHelper.safeReply(interaction, {
+        // ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ МЕТОД EDTREPLY ВМЕСТО INTERACTIONHELPER
+        await interaction.editReply({
             embeds: [
                 successEmbed(
                     `Розыгрыш успешно запущен 🎉`,
                     `Новый конкурс на приз **${prizeName}** начат в канале ${targetChannel} и завершится через **${durationString}**.`,
                 ),
             ],
-            flags: MessageFlags.Ephemeral,
         });
     },
 };
