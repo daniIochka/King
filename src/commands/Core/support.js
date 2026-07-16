@@ -3,16 +3,16 @@ import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 
 import { InteractionHelper } from '../../utils/interactionHelper.js';
-const SUPPORT_SERVER_URL = "https://discord.gg/QnWNz2dKCE";
+const SUPPORT_SERVER_URL = "https://discord.gg/j6ZEaxH3G";
 export default {
     data: new SlashCommandBuilder()
-    .setName("support")
-    .setDescription("Get link to the support server"),
+    .setName("поддержка")
+    .setDescription("Получить ссылку на сервер поддержки"),
 
   async execute(interaction) {
     try {
       const supportButton = new ButtonBuilder()
-        .setLabel("Join Support Server")
+        .setLabel("Присоединиться к серверу поддержки")
         .setStyle(ButtonStyle.Link)
         .setURL(SUPPORT_SERVER_URL);
 
@@ -20,7 +20,7 @@ export default {
 
       await InteractionHelper.safeReply(interaction, {
         embeds: [
-          createEmbed({ title: "Need Help?", description: "Join our official support server for assistance, report bugs, or suggest features. If you are customizing this bot, remember to change the link in the code!" }),
+          createEmbed({ title: "Нужна помощь?", description: "Присоединяйтесь к нашему официальному серверу поддержки для получения помощи, сообщения об ошибках или предложения функций. Если вы настраиваете этого бота, не забудьте изменить ссылку в коде!" }),
         ],
         components: [actionRow],
         flags: MessageFlags.Ephemeral,
@@ -30,7 +30,7 @@ export default {
       
       try {
         return await InteractionHelper.safeReply(interaction, {
-          embeds: [createEmbed({ title: 'System Error', description: 'Could not display support information.', color: 'error' })],
+          embeds: [createEmbed({ title: 'Системная ошибка', description: 'Не удалось отобразить информацию о поддержке.', color: 'error' })],
           flags: MessageFlags.Ephemeral,
         });
       } catch (replyError) {
