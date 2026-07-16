@@ -20,7 +20,7 @@ export function parseDuration(durationString) {
         throw new TitanBotError(
             'Invalid duration format provided',
             ErrorTypes.VALIDATION,
-            'Please provide a valid duration (e.g., 1h, 30m, 5d, 10s).',
+            'Пожалуйста, укажите корректную длительность (например, 1ч, 30м, 5д, 10с).',
             { durationString }
         );
     }
@@ -32,7 +32,7 @@ export function parseDuration(durationString) {
         throw new TitanBotError(
             `Invalid duration format: ${durationString}`,
             ErrorTypes.VALIDATION,
-            'Invalid duration format. Use: 1h, 30m, 5d, 10s (min: 10s, max: 30d)',
+            'Неверный формат длительности. Используйте: 1ч, 30м, 5д, 10с (мин: 10с, макс: 30д)',
             { input: durationString }
         );
     }
@@ -44,7 +44,7 @@ export function parseDuration(durationString) {
         throw new TitanBotError(
             `Duration amount out of range: ${amount}`,
             ErrorTypes.VALIDATION,
-            'Duration amount must be between 1 and 999.',
+            'Длительность должна быть от 1 до 999.',
             { amount, unit }
         );
     }
@@ -67,7 +67,7 @@ export function parseDuration(durationString) {
             throw new TitanBotError(
                 `Unknown duration unit: ${unit}`,
                 ErrorTypes.VALIDATION,
-                'Please use s (seconds), m (minutes), h (hours), or d (days).',
+                'Используйте с (секунды), м (минуты), ч (часы) или д (дни).',
                 { unit }
             );
     }
@@ -77,7 +77,7 @@ export function parseDuration(durationString) {
         throw new TitanBotError(
             `Duration exceeds maximum: ${ms}ms > ${maxDuration}ms`,
             ErrorTypes.VALIDATION,
-            `Maximum duration is ${Math.floor(maxDuration / (24 * 60 * 60 * 1000))} days.`,
+            `Максимальная длительность составляет ${Math.floor(maxDuration / (24 * 60 * 60 * 1000))} дней.`,
             { requestedMs: ms, maxMs: maxDuration }
         );
     }
@@ -87,7 +87,7 @@ export function parseDuration(durationString) {
         throw new TitanBotError(
             `Duration below minimum: ${ms}ms < ${minDuration}ms`,
             ErrorTypes.VALIDATION,
-            `Minimum duration is ${Math.ceil(minDuration / 1000)} seconds.`,
+            `Минимальная длительность составляет ${Math.ceil(minDuration / 1000)} секунд.`,
             { requestedMs: ms, minMs: minDuration }
         );
     }
@@ -100,7 +100,7 @@ export function validatePrize(prize) {
         throw new TitanBotError(
             'Prize must be a non-empty string',
             ErrorTypes.VALIDATION,
-            'Please provide a valid prize description.',
+            'Пожалуйста, укажите корректное описание приза.',
             { prize }
         );
     }
@@ -110,7 +110,7 @@ export function validatePrize(prize) {
         throw new TitanBotError(
             `Prize length out of range: ${trimmed.length}`,
             ErrorTypes.VALIDATION,
-            'Prize must be between 1 and 256 characters.',
+            'Описание приза должно быть от 1 до 256 символов.',
             { length: trimmed.length }
         );
     }
@@ -126,7 +126,7 @@ export function validateWinnerCount(winnerCount) {
         throw new TitanBotError(
             `Invalid winner count: ${winnerCount}`,
             ErrorTypes.VALIDATION,
-            `Winner count must be between ${minimumWinners} and ${maximumWinners}.`,
+            `Количество победителей должно быть от ${minimumWinners} до ${maximumWinners}.`,
             { winnerCount, minimumWinners, maximumWinners }
         );
     }
@@ -141,10 +141,10 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             .setColor(color)
             .setTitle(giveaway.prize || "🎁 Розыгрыш")
             .setDescription(
-                `**🎯 Организатор:** <@${giveaway.hostId}>\n\n` +
-                `**🏆 Победителей:** ${giveaway.winnerCount}\n\n` +
-                `**👤 Участников:** ${giveaway.participants?.length || 0}\n\n` +
-                `**🕐 Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
+                🎯`**🎯 Организатор:** <@${giveaway.hostId}>\n\n` +
+                🏆`**🏆 Победителей:** ${giveaway.winnerCount}\n\n` +
+                👤`**👤 Участников:** ${giveaway.participants?.length || 0}\n\n` +
+                🕐`**🕐 Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
             )
             .setFooter({ text: `ID: ${giveaway.messageId} | создаётся...` })
             .setTimestamp();
@@ -206,7 +206,7 @@ export function selectWinners(participants, winnerCount) {
         throw new TitanBotError(
             'Invalid winner count for selection',
             ErrorTypes.VALIDATION,
-            'Winner count must be at least 1.',
+            'Количество победителей должно быть не менее 1.',
             { winnerCount }
         );
     }
@@ -226,7 +226,7 @@ export function selectWinners(participants, winnerCount) {
         throw new TitanBotError(
             'Failed to select winners',
             ErrorTypes.UNKNOWN,
-            'An error occurred while selecting winners.',
+            'Произошла ошибка при выборе победителей.',
             { error: error.message, participantCount: participants.length }
         );
     }
@@ -254,7 +254,7 @@ export async function endGiveaway(client, giveaway, guildId, endedBy) {
             throw new TitanBotError(
                 'Giveaway object is null or undefined',
                 ErrorTypes.VALIDATION,
-                'Cannot end a non-existent giveaway.',
+                'Невозможно завершить несуществующий розыгрыш.',
                 { giveaway }
             );
         }
@@ -263,7 +263,7 @@ export async function endGiveaway(client, giveaway, guildId, endedBy) {
             throw new TitanBotError(
                 `Giveaway ${giveaway.messageId} is already ended`,
                 ErrorTypes.VALIDATION,
-                'This giveaway has already ended.',
+                'Этот розыгрыш уже завершён.',
                 { giveawayId: giveaway.messageId, status: 'already_ended' }
             );
         }
@@ -297,7 +297,7 @@ export async function endGiveaway(client, giveaway, guildId, endedBy) {
         throw new TitanBotError(
             'Failed to end giveaway',
             ErrorTypes.UNKNOWN,
-            'An error occurred while ending the giveaway.',
+            'Произошла ошибка при завершении розыгрыша.',
             { error: error.message, giveawayId: giveaway?.messageId }
         );
     }
@@ -346,7 +346,7 @@ export async function checkGiveaways(client) {
 
         const winnerMentions = winners.length > 0
           ? winners.map(id => `<@${id}>`).join(', ')
-          : 'No valid entries!';
+          : 'Нет действительных участников!';
 
         const endedEmbed = createGiveawayEmbed(giveaway, 'ended', winners);
 
@@ -366,7 +366,7 @@ export async function checkGiveaways(client) {
         }
 
         if (winners.length > 0) {
-          const winnerAnnouncement = `🎉 Congratulations ${winnerMentions}! You won the **${giveaway.prize || 'giveaway'}**! Please contact <@${giveaway.hostId}> to claim your prize.`;
+          const winnerAnnouncement = `🎉 Поздравляем ${winnerMentions}! Вы выиграли **${giveaway.prize || 'розыгрыш'}**! Пожалуйста, свяжитесь с <@${giveaway.hostId}> для получения приза.`;
           const winnerPingMsg = await channel.send({ content: winnerAnnouncement });
           giveaway.winnerPingMessageId = winnerPingMsg.id;
           await markGiveawayEnded(client, giveawayId, giveaway);
@@ -402,7 +402,7 @@ export async function checkGiveaways(client) {
             logger.debug('Error logging giveaway winner:', error);
           }
         } else {
-          await channel.send({ content: `The giveaway for **${giveaway.prize}** has ended with no valid entries.` });
+          await channel.send({ content: `Розыгрыш **${giveaway.prize}** завершён без действительных участников.` });
         }
 
         logger.info(`Ended giveaway ${messageId} in guild ${guildId}`);
@@ -413,4 +413,4 @@ export async function checkGiveaways(client) {
   } catch (error) {
     logger.error('Error checking giveaways:', error);
   }
-}
+    }
