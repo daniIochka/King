@@ -138,13 +138,13 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
         const isEnded = status === 'ended' || status === 'reroll';
         const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active');
         const embed = new EmbedBuilder()
-            .setColor(color)
+            .setColor(FF00FF)
             .setTitle(giveaway.prize || "🎁 Розыгрыш")
             .setDescription(
-                `**🎯 Организатор:** <@${giveaway.hostId}>\n\n` +
-                `**🏆 Победителей:** ${giveaway.winnerCount}\n\n` +
-                `**👤 Участников:** ${giveaway.participants?.length || 0}\n\n` +
-                `**🕐 Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
+                `**🎯Организатор:** <@${giveaway.hostId}>\n\n` +
+                `**🏆Победителей:** ${giveaway.winnerCount}\n\n` +
+                `**👤Участников:** ${giveaway.participants?.length || 0}\n\n` +
+                `**🕐Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
             )
             .setFooter({ text: `ID: ${giveaway.messageId} | создаётся...` })
             .setTimestamp();
