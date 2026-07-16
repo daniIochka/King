@@ -132,19 +132,36 @@ export function validateWinnerCount(winnerCount) {
     }
 }
 
+// ===== ИЗМЕНЕНО: создание embed в стиле скриншота с полями =====
 export function createGiveawayEmbed(giveaway, status, winners = []) {
     try {
-        const statusEmoji = status === 'ended' ? '🎉' : status === 'reroll' ? '🔄' : '🎉';
         const isEnded = status === 'ended' || status === 'reroll';
         const color = isEnded ? getColor('giveaway.ended') : getColor('giveaway.active');
+
         const embed = new EmbedBuilder()
-            .setColor(FF00FF)
+            .setColor(color)
             .setTitle(giveaway.prize || "🎁 Розыгрыш")
-            .setDescription(
-                `**Организатор:** <@${giveaway.hostId}>\n\n` +
-                `**Победителей:** ${giveaway.winnerCount}\n\n` +
-                `**Участников:** ${giveaway.participants?.length || 0}\n\n` +
-                `**Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
+            .addFields(
+                {
+                    name: '👤 Организатор',
+                    value: `<@${giveaway.hostId}>`,
+                    inline: true
+                },
+                {
+                    name: '🏆 Победителей',
+                    value: `${giveaway.winnerCount}`,
+                    inline: true
+                },
+                {
+                    name: '👥 Участников',
+                    value: `${giveaway.participants?.length || 0}`,
+                    inline: true
+                },
+                {
+                    name: '⏳ Осталось',
+                    value: `<t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`,
+                    inline: true
+                }
             )
             .setFooter({ text: `ID: ${giveaway.messageId} | создаётся...` })
             .setTimestamp();
@@ -169,7 +186,9 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             .setDescription('Не удалось создать embed розыгрыша');
     }
 }
+// ===== КОНЕЦ ИЗМЕНЕНИЙ =====
 
+// ===== ИЗМЕНЕНО: кнопки «Участвовать» и «Выйти» вместо «Участники» =====
 export function createGiveawayButtons(isEnded = false) {
     if (isEnded) {
         return new ActionRowBuilder()
@@ -189,11 +208,12 @@ export function createGiveawayButtons(isEnded = false) {
                 .setLabel('🎉 Участвовать')
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId('giveaway_entries')
-                .setLabel('👤 Участники')
+                .setCustomId('giveaway_leave')    // ← изменено
+                .setLabel('🚪 Выйти')
                 .setStyle(ButtonStyle.Secondary)
         );
 }
+// ===== КОНЕЦ ИЗМЕНЕНИЙ =====
 
 export function selectWinners(participants, winnerCount) {
     if (!Array.isArray(participants) || participants.length === 0) {
