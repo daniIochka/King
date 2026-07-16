@@ -35,14 +35,14 @@ export default {
         .setDescription('💬 Отправить обычное сообщение от имени бота')
         .addStringOption((option) =>
             option
-                .setName('message')
+                .setName('сообщение')
                 .setDescription('Сообщение, которое бот должен отправить')
                 .setRequired(true)
                 .setMaxLength(2000),
         )
         .addChannelOption((option) =>
             option
-                .setName('channel')
+                .setName('канал')
                 .setDescription('Канал для отправки (по умолчанию текущий канал)')
                 .addChannelTypes(...TEXT_CHANNEL_TYPES)
                 .setRequired(false),
