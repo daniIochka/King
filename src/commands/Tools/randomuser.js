@@ -7,23 +7,23 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('randomuser')
-        .setDescription('Select a random user from the server')
+        .setName('рандомный_пользователь')
+        .setDescription('Выбрать случайного пользователя на сервере')
         .addRoleOption(option =>
-            option.setName('role')
-                .setDescription('Limit selection to users with this role')
+            option.setName('роль')
+                .setDescription('Ограничить выбор пользователями с этой ролью')
                 .setRequired(false))
         .addBooleanOption(option =>
-            option.setName('bots')
-                .setDescription('Include bots in the selection (default: false)')
+            option.setName('боты')
+                .setDescription('Включить ботов в выбор (по умолчанию: false)')
                 .setRequired(false))
         .addBooleanOption(option =>
-            option.setName('online')
-                .setDescription('Only select from online users (default: false)')
+            option.setName('онлайн')
+                .setDescription('Выбирать только среди онлайн пользователей (по умолчанию: false)')
                 .setRequired(false))
         .addBooleanOption(option =>
-            option.setName('mention')
-                .setDescription('Mention the selected user (default: false)')
+            option.setName('упоминание')
+                .setDescription('Упомянуть выбранного пользователя (по умолчанию: false)')
                 .setRequired(false)),
 
     async execute(interaction) {
@@ -40,14 +40,14 @@ export default {
         if (!interaction.guild) {
             return replyUserError(interaction, {
                 type: ErrorTypes.VALIDATION,
-                message: 'This command can only be used in a server/guild.',
+                message: 'Эту команду можно использовать только на сервере/гильдии.',
             });
         }
 
-        const role = interaction.options.getRole('role');
-        const includeBots = interaction.options.getBoolean('bots') || false;
-        const onlineOnly = interaction.options.getBoolean('online') || false;
-        const shouldMention = interaction.options.getBoolean('mention') || false;
+        const role = interaction.options.getRole('роль');
+        const includeBots = interaction.options.getBoolean('боты') || false;
+        const onlineOnly = interaction.options.getBoolean('онлайн') || false;
+        const shouldMention = interaction.options.getBoolean('упоминание') || false;
 
         let members = interaction.guild.members.cache.filter(member => {
             if (member.user.bot && !includeBots) return false;
@@ -66,14 +66,14 @@ export default {
         }
 
         if (memberArray.length === 0) {
-            let errorMessage = 'Could not find any users matching your filters:';
-            if (role) errorMessage = `No users have the **${role.name}** role.`;
-            if (onlineOnly) errorMessage = 'No users are currently online.';
-            if (role && onlineOnly) errorMessage = `No **${role.name}** members are online.`;
+            let errorMessage = 'Не найдено пользователей, соответствующих вашим фильтрам:';
+            if (role) errorMessage = `Нет пользователей с ролью **${role.name}**.`;
+            if (onlineOnly) errorMessage = 'В данный момент нет пользователей онлайн.';
+            if (role && onlineOnly) errorMessage = `Нет участников с ролью **${role.name}** в сети.`;
 
             return replyUserError(interaction, {
                 type: ErrorTypes.USER_INPUT,
-                message: errorMessage + '\n\nTry adjusting your filters.',
+                message: errorMessage + '\n\nПопробуйте изменить фильтры.',
             });
         }
 
@@ -89,14 +89,14 @@ export default {
             .slice(0, 10);
 
         const embed = successEmbed(
-            '🎲 Random User Selected',
+            '🎲 Случайный пользователь выбран',
             shouldMention ? `${selectedMember}` : `**${user.username}**`
         )
         .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }))
         .addFields(
-            { name: 'Username', value: user.username, inline: true },
-            { name: 'Bot', value: user.bot ? 'Yes' : 'No', inline: true },
-            { name: `Roles (${roles.length})`, value: roles.length > 0 ? roles.slice(0, 5).join('') + (roles.length > 5 ? `+${roles.length - 5} more` : '') : 'No roles', inline: false }
+            { name: 'Имя пользователя', value: user.username, inline: true },
+            { name: 'Бот', value: user.bot ? 'Да' : 'Нет', inline: true },
+            { name: `Роли (${roles.length})`, value: roles.length > 0 ? roles.slice(0, 5).join('') + (roles.length > 5 ? `+${roles.length - 5} ещё` : '') : 'Нет ролей', inline: false }
         )
         .setColor('primary');
 
@@ -104,12 +104,12 @@ export default {
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(`randomuser_${interaction.user.id}_again`)
-                    .setLabel('🎲 Pick Another User')
+                    .setLabel('🎲 Выбрать другого пользователя')
                     .setStyle(ButtonStyle.Primary)
             );
 
         const response = await interaction.editReply({
-            content: shouldMention ? `${selectedMember}, you've been chosen!` : null,
+            content: shouldMention ? `${selectedMember}, вы выбраны!` : null,
             embeds: [embed],
             components: [row],
             allowedMentions: { users: shouldMention ? [user.id] : [] }
@@ -139,7 +139,7 @@ export default {
                 if (newMemberArray.length === 0) {
                     await replyUserError(i, {
                         type: ErrorTypes.USER_INPUT,
-                        message: 'No users found matching the criteria.',
+                        message: 'Не найдено пользователей, соответствующих критериям.',
                     });
                     return;
                 }
@@ -155,28 +155,28 @@ export default {
                     .slice(0, 10);
 
                 const newEmbed = successEmbed(
-                    '🎲 Random User Selected',
+                    '🎲 Случайный пользователь выбран',
                     shouldMention ? `${newSelectedMember}` : `**${newUser.username}**`
                 )
                 .setThumbnail(newUser.displayAvatarURL({ dynamic: true, size: 256 }))
                 .addFields(
-                    { name: 'Username', value: newUser.username, inline: true },
-                    { name: 'Bot', value: newUser.bot ? 'Yes' : 'No', inline: true },
-                    { name: `Roles (${newRoles.length})`, value: newRoles.length > 0 ? newRoles.slice(0, 5).join('') + (newRoles.length > 5 ? `+${newRoles.length - 5} more` : '') : 'No roles', inline: false }
+                    { name: 'Имя пользователя', value: newUser.username, inline: true },
+                    { name: 'Бот', value: newUser.bot ? 'Да' : 'Нет', inline: true },
+                    { name: `Роли (${newRoles.length})`, value: newRoles.length > 0 ? newRoles.slice(0, 5).join('') + (newRoles.length > 5 ? `+${newRoles.length - 5} ещё` : '') : 'Нет ролей', inline: false }
                 )
                 .setColor(newSelectedMember.displayHexColor || '#3498db');
 
                 await i.update({
-                    content: shouldMention ? `${newSelectedMember}, you've been chosen!` : null,
+                    content: shouldMention ? `${newSelectedMember}, вы выбраны!` : null,
                     embeds: [newEmbed],
                     components: [row],
                     allowedMentions: { users: shouldMention ? [newUser.id] : [] }
                 });
 
             } catch (error) {
-                logger.error('Button interaction error:', error);
+                logger.error('Ошибка при взаимодействии с кнопкой:', error);
                 await i.reply({
-                    content: 'An error occurred while selecting another user.',
+                    content: 'Произошла ошибка при выборе другого пользователя.',
                     flags: ['Ephemeral']
                 });
             }
