@@ -31,8 +31,8 @@ function resolveTargetChannel(interaction) {
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('say')
-        .setDescription('Отправить обычное сообщение от имени бота')
+        .setName('сказать')
+        .setDescription('💬 Отправить обычное сообщение от имени бота')
         .addStringOption((option) =>
             option
                 .setName('message')
