@@ -132,7 +132,7 @@ export function validateWinnerCount(winnerCount) {
     }
 }
 
-// ===== ИЗМЕНЕНО: создание embed в стиле скриншота с полями =====
+
 export function createGiveawayEmbed(giveaway, status, winners = []) {
     try {
         const isEnded = status === 'ended' || status === 'reroll';
@@ -142,76 +142,37 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             .setColor(color)
             .setTitle(giveaway.prize || "🎁 Розыгрыш")
             .addFields(
-                {
-                    name: '👤 Организатор',
-                    value: `<@${giveaway.hostId}>`,
-                    inline: true
-                },
-                {
-                    name: '🏆 Победителей',
-                    value: `${giveaway.winnerCount}`,
-                    inline: true
-                },
-                {
-                    name: '👥 Участников',
-                    value: `${giveaway.participants?.length || 0}`,
-                    inline: true
-                },
-                {
-                    name: '⏳ Осталось',
-                    value: `<t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`,
-                    inline: true
-                }
+                { name: '👤 Организатор', value: `<@${giveaway.hostId}>`, inline: true },
+                { name: '🏆 Победителей', value: `${giveaway.winnerCount}`, inline: true },
+                { name: '👥 Участников', value: `${giveaway.participants?.length || 0}`, inline: true },
+                { name: '⏳ Осталось', value: `<t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`, inline: true }
             )
             .setFooter({ text: `ID: ${giveaway.messageId} | создаётся...` })
             .setTimestamp();
 
         if (isEnded) {
-            const winnerDisplay = winners.length > 0
-                ? winners.map(id => `🎉 <@${id}>`).join('\n')
-                : 'Нет участников!';
-            embed.addFields({
-                name: 'Победители',
-                value: winnerDisplay,
-                inline: false
-            });
+            const winnerDisplay = winners.length > 0 ? winners.map(id => `🎉 <@${id}>`).join('\n') : 'Нет участников!';
+            embed.addFields({ name: 'Победители', value: winnerDisplay, inline: false });
         }
 
         return embed;
     } catch (error) {
         logger.error('Ошибка создания embed для розыгрыша:', error);
-        return new EmbedBuilder()
-            .setColor(0xFF0000)
-            .setTitle('⚠️ Ошибка')
-            .setDescription('Не удалось создать embed розыгрыша');
+        return new EmbedBuilder().setColor(0xFF0000).setTitle('⚠️ Ошибка').setDescription('Не удалось создать embed розыгрыша');
     }
 }
-// ===== КОНЕЦ ИЗМЕНЕНИЙ =====
 
-// ===== ИЗМЕНЕНО: кнопки «Участвовать» и «Выйти» вместо «Участники» =====
+// ===== кнопки с эмодзи =====
 export function createGiveawayButtons(isEnded = false) {
     if (isEnded) {
-        return new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId('giveaway_ended')
-                    .setLabel('🏁 Завершён')
-                    .setStyle(ButtonStyle.Secondary)
-                    .setDisabled(true)
-            );
-    }
-
-    return new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId('giveaway_join')
-                .setLabel('🎉 Участвовать')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId('giveaway_leave')    // ← изменено
-                .setLabel('🚪 Выйти')
-                .setStyle(ButtonStyle.Secondary)
+        return new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId('giveaway_ended').setLabel('🏁 Завершён').setStyle(ButtonStyle.Secondary).setDisabled(true)
         );
+    }
+    return new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('giveaway_join').setLabel('🎉 Участвовать').setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId('giveaway_leave').setLabel('🚪 Выйти').setStyle(ButtonStyle.Secondary)
+    );
 }
 // ===== КОНЕЦ ИЗМЕНЕНИЙ =====
 
