@@ -141,7 +141,7 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             .setColor(color)
             .setTitle(giveaway.prize || "🎁 Розыгрыш")
             .setDescription(
-                `**🎯 Организатор:** <@${giveaway.hostId}>\n\n` +
+               .setEmoji("🎯") `**🎯 Организатор:** <@${giveaway.hostId}>\n\n` +
                 `**🏆 Победителей:** ${giveaway.winnerCount}\n\n` +
                 `**👤 Участников:** ${giveaway.participants?.length || 0}\n\n` +
                 `**🕐 Длительность:** <t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`
