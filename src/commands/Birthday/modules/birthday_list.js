@@ -4,6 +4,7 @@ import { deleteBirthday } from '../../../utils/database.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
+
 export default {
     async execute(interaction, config, client) {
         await InteractionHelper.safeDefer(interaction);
@@ -15,8 +16,8 @@ export default {
         if (sortedBirthdays.length === 0) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthdays')
-                .setDescription('No birthdays have been set in this server yet.');
+                .setTitle('❌ Нет дней рождения')
+                .setDescription('На этом сервере ещё никто не установил день рождения.');
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
@@ -47,30 +48,31 @@ export default {
         if (displayIndex === 0) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthdays')
-                .setDescription('No birthdays have been set by current server members.');
+                .setTitle('❌ Нет дней рождения')
+                .setDescription('Никто из текущих участников сервера не установил день рождения.');
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
         }
 
-        birthdayList = `**${displayIndex} birthday${displayIndex !== 1 ? 's' : ''} in ${interaction.guild.name}**\n\n` + birthdayList;
+        const birthdayWord = displayIndex === 1 ? 'день рождения' : 'дней рождения';
+        birthdayList = `**${displayIndex} ${birthdayWord} на сервере ${interaction.guild.name}**\n\n` + birthdayList;
 
         const embed = new EmbedBuilder()
             .setColor(0x00FF00)
-            .setTitle('Server Birthdays')
-            .setDescription(`${birthdayList}\n\nTotal: ${displayIndex} birthday${displayIndex !== 1 ? 's' : ''}`);
+            .setTitle('🎂 Дни рождения на сервере')
+            .setDescription(`${birthdayList}\n\nВсего: ${displayIndex} ${birthdayWord}`);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed]
         });
 
-        logger.info('Birthday list retrieved successfully', {
+        logger.info('Список дней рождения успешно получен', {
             userId: interaction.user.id,
             guildId,
             birthdayCount: displayIndex,
             staleRemoved: staleUserIds.length,
-            commandName: 'birthday_list'
+            commandName: 'лист_день_рождения'
         });
     }
 };
