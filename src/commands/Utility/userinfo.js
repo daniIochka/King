@@ -1,4 +1,5 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder } from '@discordjs/builders';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -29,25 +30,13 @@ export default {
         const createdTimestamp = Math.floor(user.createdAt.getTime() / 1000);
         const joinedTimestamp = member?.joinedAt ? Math.floor(member.joinedAt.getTime() / 1000) : null;
 
-        // Дополнительные данные
-        const nickname = member?.nickname || "Нет";
-        const isBooster = member?.premiumSince ? "Да" : "Нет";
-        const boosterSince = member?.premiumSince ? Math.floor(member.premiumSince.getTime() / 1000) : null;
-        const totalRoles = member ? member.roles.cache.size - 1 : 0;
-        const isOwner = member?.id === interaction.guild.ownerId ? "Да" : "Нет";
-
-        // Получаем все роли пользователя (кроме @everyone)
-        const roles = member ? member.roles.cache.filter(r => r.id !== interaction.guild.id).map(r => r) : [];
-        const rolesList = roles.length > 0 
-            ? roles.map(r => `${r}`).join(' ') 
-            : 'Нет';
-
-        // Получаем высшую роль
         const highestRole = member?.roles?.highest && member.roles.highest.id !== interaction.guild.id 
             ? member.roles.highest 
             : null;
 
-        // Формируем строку с активностью (статусом)
+        const roles = member ? member.roles.cache.filter(r => r.id !== interaction.guild.id).map(r => r) : [];
+        const totalRoles = roles.length;
+
         const presence = member?.presence;
         let statusEmoji = '⬛';
         let statusText = 'Не в сети';
@@ -74,7 +63,6 @@ export default {
             }
         }
 
-        // Активность (игра)
         let activityText = 'Нет';
         if (presence?.activities?.length > 0) {
             const activity = presence.activities[0];
@@ -87,11 +75,9 @@ export default {
             else activityText = activity.name;
         }
 
-        // Формируем никнейм с цветом роли (для версии 14.26.4)
         const displayName = member?.displayName || user.username;
         const roleMention = highestRole ? `${highestRole}` : 'Без роли';
 
-        // Создаем эмбед с дизайном как в Discord
         const embed = new EmbedBuilder()
             .setColor(highestRole?.color || 0x5865F2)
             .setAuthor({
@@ -121,15 +107,13 @@ export default {
                 }
             )
             .setFooter({
-                text: `Роли: ${totalRoles} • ${isBooster === 'Да' ? '💎 Бустер' : 'Не бустер'}${isOwner === 'Да' ? ' • 👑 Владелец' : ''}`,
+                text: `🎭 Роли: ${totalRoles}`,
                 iconURL: interaction.guild.iconURL({ dynamic: true })
             })
             .setTimestamp();
 
-        // Добавляем поле с ролями, если они есть и не превышают лимит
-        if (rolesList !== 'Нет') {
-            // В версии 14.26.4 роли отображаются как <@&roleId>
-            const rolesDisplay = roles.map(r => `<@&${r.id}>`).join(' ');
+        if (roles.length > 0) {
+            const rolesDisplay = roles.map(r => `${r}`).join(' ');
             if (rolesDisplay.length <= 1024) {
                 embed.addFields({
                     name: '🎭 Роли',
@@ -137,11 +121,10 @@ export default {
                     inline: false
                 });
             } else {
-                // Если слишком много ролей, показываем первые несколько
-                const truncatedRoles = roles.slice(0, 20).map(r => `<@&${r.id}>`).join(' ');
+                const truncatedRoles = roles.slice(0, 15).map(r => `${r}`).join(' ');
                 embed.addFields({
-                    name: '🎭 Роли (первые 20)',
-                    value: truncatedRoles + `\n... и еще ${roles.length - 20} ролей`,
+                    name: '🎭 Роли (первые 15)',
+                    value: truncatedRoles + `\n... и еще ${roles.length - 15} ролей`,
                     inline: false
                 });
             }
