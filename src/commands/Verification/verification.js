@@ -11,35 +11,35 @@ import verificationDashboard from './modules/verification_dashboard.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("verification")
+        .setName("верификация")
         .setDescription("Управление системой верификации сервера")
         .addSubcommand(subcommand =>
             subcommand
-                .setName("setup")
+                .setName("настроить")
                 .setDescription("Настроить систему верификации")
                 .addChannelOption(option =>
                     option
-                        .setName("verification_channel")
+                        .setName("канал")
                         .setDescription("Канал, куда будут отправляться сообщения верификации")
                         .addChannelTypes(ChannelType.GuildText)
                         .setRequired(true)
                 )
                 .addRoleOption(option =>
                     option
-                        .setName("verified_role")
+                        .setName("роль")
                         .setDescription("Роль, выдаваемая верифицированным пользователям")
                         .setRequired(true)
                 )
                 .addStringOption(option =>
                     option
-                        .setName("message")
+                        .setName("сообщение")
                         .setDescription("Пользовательское сообщение для верификации")
                         .setMaxLength(2000)
                         .setRequired(false)
                 )
                 .addStringOption(option =>
                     option
-                        .setName("button_text")
+                        .setName("кнопка_текст")
                         .setDescription("Текст для кнопки верификации")
                         .setMaxLength(80)
                         .setRequired(false)
@@ -47,18 +47,18 @@ export default {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName("remove")
+                .setName("удалить")
                 .setDescription("Удалить верификацию у пользователя")
                 .addUserOption(option =>
                     option
-                        .setName("user")
+                        .setName("пользователь")
                         .setDescription("Пользователь, у которого нужно удалить верификацию")
                         .setRequired(true)
                 )
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName("dashboard")
+                .setName("управление")
                 .setDescription("Открыть панель управления системой верификации")
         ),
 
@@ -77,11 +77,11 @@ export default {
             }
 
             switch (subcommand) {
-                case "setup":
+                case "настроить":
                     return await handleSetup(interaction, guild, client);
-                case "remove":
+                case "удалить":
                     return await handleRemove(interaction, guild, client);
-                case "dashboard":
+                case "управление":
                     return await verificationDashboard.execute(interaction, config, client);
                 default:
                     throw createError(
@@ -91,17 +91,17 @@ export default {
                         { subcommand }
                     );
             }
-        }, { command: 'verification', subcommand: interaction.options.getSubcommand() });
+        }, { command: 'верификация', subcommand: interaction.options.getSubcommand() });
 
         return await wrappedExecute(interaction, config, client);
     }
 };
 
 async function handleSetup(interaction, guild, client) {
-    const verificationChannel = interaction.options.getChannel("verification_channel");
-    const verifiedRole = interaction.options.getRole("verified_role");
-    const message = interaction.options.getString("message") || botConfig.verification.defaultMessage;
-    const buttonText = interaction.options.getString("button_text") || botConfig.verification.defaultButtonText;
+    const verificationChannel = interaction.options.getChannel("канал");
+    const verifiedRole = interaction.options.getRole("роль");
+    const message = interaction.options.getString("сообщение") || botConfig.verification.defaultMessage;
+    const buttonText = interaction.options.getString("кнопка_текст") || botConfig.verification.defaultButtonText;
     const botMember = guild.members.me;
 
     if (!botMember) {
