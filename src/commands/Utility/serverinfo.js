@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -29,14 +28,27 @@ export default {
         const botCount = members.filter(m => m.user.bot).size;
         const humanCount = totalMembers - botCount;
 
+        // Статусы
+        const statuses = {
+            online: members.filter(m => m.presence?.status === 'online').size,
+            idle: members.filter(m => m.presence?.status === 'idle').size,
+            dnd: members.filter(m => m.presence?.status === 'dnd').size,
+            offline: members.filter(m => !m.presence || m.presence.status === 'offline').size
+        };
+
         // Каналы
         const channels = guild.channels.cache;
         const textChannels = channels.filter(c => c.type === 0).size;
         const voiceChannels = channels.filter(c => c.type === 2).size;
         const categoryChannels = channels.filter(c => c.type === 4).size;
+        const newsChannels = channels.filter(c => c.type === 5).size;
+        const stageChannels = channels.filter(c => c.type === 13).size;
 
         // Эмодзи
-        const totalEmojis = guild.emojis.cache.size;
+        const emojis = guild.emojis.cache;
+        const totalEmojis = emojis.size;
+        const animatedEmojis = emojis.filter(e => e.animated).size;
+        const staticEmojis = totalEmojis - animatedEmojis;
 
         // Бусты
         const boostLevel = guild.premiumTier;
@@ -48,10 +60,10 @@ export default {
         const ageMonths = Math.floor(ageDays / 30);
         const ageText = ageMonths > 0 ? `${ageMonths} месяцев назад` : `${ageDays} дней назад`;
 
-        // Баннер сервера
+        // Баннер
         const bannerUrl = guild.bannerURL({ size: 1024 });
 
-        // Создаём Embed
+        // EmbedBuilder ИЗ discord.js
         const embed = new EmbedBuilder()
             .setColor(0x2B2D31)
             .setTitle(`📊 ${guild.name}`)
@@ -73,11 +85,6 @@ export default {
                 iconURL: guild.iconURL({ dynamic: true })
             })
             .setTimestamp();
-
-        // Добавляем БАННЕР если есть
-        if (bannerUrl) {
-            embed.setImage(https://cdn.discordapp.com/attachments/1440369571495415881/1527756360555561031/Screenshot_20260718_020537_com_discord_MainActivity.jpg?ex=6a5bd17c&is=6a5a7ffc&hm=2b749c258f54a86fbef892938eb9187a89da607b39c7d3927e5d13cfdb8edf05&);
-        }
 
         await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
         logger.info(`ServerInfo command executed`, {
