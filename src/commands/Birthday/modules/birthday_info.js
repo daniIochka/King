@@ -3,11 +3,12 @@ import { getUserBirthday } from '../../../services/birthdayService.js';
 import { logger } from '../../../utils/logger.js';
 
 import { InteractionHelper } from '../../../utils/interactionHelper.js';
+
 export default {
     async execute(interaction, config, client) {
         await InteractionHelper.safeDefer(interaction);
 
-        const targetUser = interaction.options.getUser("user") || interaction.user;
+        const targetUser = interaction.options.getUser("пользователь") || interaction.user;
         const userId = targetUser.id;
         const guildId = interaction.guildId;
 
@@ -16,10 +17,10 @@ export default {
         if (!birthdayData) {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('No Birthday Found')
+                .setTitle('❌ День рождения не найден')
                 .setDescription(targetUser.id === interaction.user.id 
-                    ? "You haven't set your birthday yet. Use `/birthday set` to add it!"
-                    : `${targetUser.username} hasn't set their birthday yet.`);
+                    ? "Вы ещё не установили свой день рождения. Используйте `/деньрождения установить`, чтобы добавить его!"
+                    : `${targetUser.username} ещё не установил(а) свой день рождения.`);
             return await InteractionHelper.safeEditReply(interaction, {
                 embeds: [embed]
             });
@@ -27,18 +28,18 @@ export default {
 
         const embed = new EmbedBuilder()
             .setColor(0x00FF00)
-            .setTitle('Birthday Information')
-            .setDescription(`**Date:** ${birthdayData.monthName} ${birthdayData.day}\n**User:** ${targetUser.toString()}`);
+            .setTitle('🎂 Информация о дне рождения')
+            .setDescription(`**Дата:** ${birthdayData.monthName} ${birthdayData.day}\n**Пользователь:** ${targetUser.toString()}`);
 
         await InteractionHelper.safeEditReply(interaction, {
             embeds: [embed]
         });
 
-        logger.info('Birthday info retrieved successfully', {
+        logger.info('Информация о дне рождения успешно получена', {
             userId: interaction.user.id,
             targetUserId: targetUser.id,
             guildId,
-            commandName: 'birthday_info'
+            commandName: 'инфо_день_рохдения'
         });
     }
 };
