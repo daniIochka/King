@@ -32,7 +32,7 @@ export default {
             logger.warn(`RandomUser interaction defer failed`, {
                 userId: interaction.user.id,
                 guildId: interaction.guildId,
-                commandName: 'randomuser'
+                commandName: 'рандомный_пользователь'
             });
             return;
         }
