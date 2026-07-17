@@ -1,6 +1,6 @@
 // embeds.js
 
-import { EmbedBuilder } from '@discordjs/builders';
+import { EmbedBuilder } from 'discord.js';
 import { getColor, botConfig } from '../config/bot.js';
 
 const EMOJI_REGEX = /[\p{Extended_Pictographic}\uFE0F]/gu;
