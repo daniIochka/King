@@ -5,7 +5,7 @@ import { InteractionHelper } from '../../utils/interactionHelper.js';
 
 export default {
     data: new SlashCommandBuilder()
-    .setName("serverinfo")
+    .setName("сервер_инфо")
     .setDescription("Получить подробную информацию о сервере"),
 
   async execute(interaction) {
@@ -14,7 +14,7 @@ export default {
       logger.warn(`ServerInfo interaction defer failed`, {
         userId: interaction.user.id,
         guildId: interaction.guildId,
-        commandName: 'serverinfo'
+        commandName: 'сервер_инфо'
       });
       return;
     }
