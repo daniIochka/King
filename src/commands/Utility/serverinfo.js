@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { EmbedBuilder } from '@discordjs/builders';
 import { createEmbed } from '../../utils/embeds.js';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
