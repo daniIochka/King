@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { EmbedBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, EmbedBuilder } from '@discordjs/builders';
 import { logger } from '../../utils/logger.js';
 import { InteractionHelper } from '../../utils/interactionHelper.js';
 
@@ -64,6 +63,7 @@ export default {
         // Баннер
         const bannerUrl = guild.bannerURL({ size: 1024 });
 
+        // СОЗДАЁМ EMBED ЧЕРЕЗ new EmbedBuilder() из @discordjs/builders
         const embed = new EmbedBuilder()
             .setColor(0x2B2D31)
             .setTitle(`📊 ${guild.name}`)
@@ -88,7 +88,7 @@ export default {
 
         // Добавляем баннер если есть
         if (bannerUrl) {
-            embed.setImage(https://cdn.discordapp.com/attachments/1440369571495415881/1527432877036273824/file_00000000fcc8720a986d2c1018d344f2.png?ex=6a5b4cf8&is=6a59fb78&hm=e43a79c3abddf0a086d4cc9fa8c92c491f844c011507daf599f53daaf0db5908&);
+            embed.setImage(https://cdn.discordapp.com/attachments/1440369571495415881/1527756360555561031/Screenshot_20260718_020537_com_discord_MainActivity.jpg?ex=6a5bd17c&is=6a5a7ffc&hm=2b749c258f54a86fbef892938eb9187a89da607b39c7d3927e5d13cfdb8edf05&);
         }
 
         await InteractionHelper.safeEditReply(interaction, { embeds: [embed] });
