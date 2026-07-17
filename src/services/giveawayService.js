@@ -142,10 +142,10 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             .setColor(color)
             .setTitle(giveaway.prize || "🎁 Розыгрыш")
             .addFields(
-                { name: '👤 Организатор', value: `<@${giveaway.hostId}>`, inline: true, emoji: 👤 },
-                { name: '🏆 Победителей', value: `${giveaway.winnerCount}`, inline: true, emoji:🏆 },
-                { name: '👥 Участников', value: `${giveaway.participants?.length || 0}`, inline: true, emoji:👥 },
-                { name: '⏳ Осталось', value: `<t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`, inline: true, emoji:⏳ }
+                { name: '👤 Организатор', value: `<@${giveaway.hostId}>`, inline: true, emoji: `👤` },
+                { name: '🏆 Победителей', value: `${giveaway.winnerCount}`, inline: true, emoji: `🏆` },
+                { name: '👥 Участников', value: `${giveaway.participants?.length || 0}`, inline: true, emoji: `👥` },
+                { name: '⏳ Осталось', value: `<t:${Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>`, inline: true, emoji: `⏳` }
             )
             .setFooter({ text: `ID: ${giveaway.messageId} | создаётся...` })
             .setTimestamp();
