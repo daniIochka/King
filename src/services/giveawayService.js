@@ -140,8 +140,9 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
 
         const embed = new EmbedBuilder()
             .setColor(color)
-            .setTitle(giveaway.prize || "🎁 Розыгрыш")
+            .setTitle("🎉 Розыгрыш 🎉")
             .addFields(
+                { name: `🎁 Приз`, value: `${giveaway.prize}`, inline: true },
                 { name: '🎯 Организатор', value: `<@${giveaway.hostId}>`, inline: true },
                 { name: '🏆 Победителей', value: `${giveaway.winnerCount}`, inline: true },
                 { name: '👥 Участников', value: `${giveaway.participants?.length || 0}`, inline: true },
