@@ -143,8 +143,8 @@ export function createGiveawayEmbed(giveaway, status, winners = []) {
             .setTitle(giveaway.prize || "🎁 Розыгрыш")
             .addFields(
                 { name: '🎯 Организатор', value: <${giveaway.hostId}>, inline: true },
-                { name: '🏆 Победителей', value: {giveaway.winnerCount}, inline: true },
-                { name: '👥 Участников', value: {giveaway.participants?.length || 0}, inline: true },
+                { name: '🏆 Победителей', value: <${giveaway.winnerCount}>, inline: true },
+                { name: '👥 Участников', value: <${giveaway.participants?.length || 0}, inline: true },
                 { name: '⏳ Осталось', value: <t:{Math.floor((giveaway.endsAt || giveaway.endTime) / 1000)}:R>, inline: true }
             )
             .setFooter({ text: `Начался розыгрыш,выполни условия!` })
