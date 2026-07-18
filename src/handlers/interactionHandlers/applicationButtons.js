@@ -1,5 +1,4 @@
-import { PermissionFlagsBits } from 'discord.js';
-import { EmbedBuilder } from `@discordjs/builders`;
+import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 
 // ===== НАСТРОЙКИ =====
